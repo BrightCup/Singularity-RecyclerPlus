@@ -40,6 +40,11 @@ neoForge {
 
 repositories {
     mavenCentral()
+    // JEI
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+    }
 }
 
 dependencies {
@@ -47,6 +52,10 @@ dependencies {
     compileOnly files('libs/mio_icif.jar')
     // 仅用于 runClient / runServer 的本地联调，不会被打进产物。
     runtimeOnly files('libs/mio_icif.jar')
+
+    // JEI 只用于构建期编译与本地联调；运行时由整合包提供，不打进产物。
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {

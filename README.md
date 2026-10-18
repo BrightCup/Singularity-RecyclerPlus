@@ -152,6 +152,10 @@ systemProp.https.proxyPort=7890
 | `RecipeSlots#prepare` | `(MachineItemHandler,int,int,int[],List<ItemStack>) → Optional<Prepared>` |
 | `RecipeSlots.Prepared#commit` | `public boolean` |
 
+JEI 相关 API 同样是对照 `jei-1.21.1-neoforge-19.57.0.451.jar` 用 `javap` 核对的，
+包括 `IModPlugin#getPluginUid` 返回 `ResourceLocation`、`IRecipeCategory` 的
+`getRecipeType / getTitle / getIcon / setRecipe` 四个必需方法、`RecipeType#create(String,String,Class)` 等。
+
 ## 使用
 
 把 `recyclerplus-1.0.0.jar` 和原 mod 一起丢进 `mods/`。首次启动会在 `config/recyclerplus.json` 生成模板：
@@ -186,16 +190,42 @@ systemProp.https.proxyPort=7890
 | `chance` | 产出概率 0–1，缺省 1.0。未通过概率时只消耗输入；设为 0 即「只销毁、不产出」 |
 | 匹配顺序 | 按数组顺序，**第一条命中即生效** |
 
-改完配置需要**重启服务器**（配置在 `ServerStartedEvent` 阶段解析）。
+改完配置的生效方式：
+
+| 场景 | 操作 |
+|---|---|
+| 单人游戏 | **退出到标题界面再进存档**即可，不用重启游戏（每次进存档都会新建集成服务端并触发 `ServerStartedEvent`） |
+| 专用服务器 | **必须重启服务器**。`/reload` 不会触发 `ServerStartedEvent` |
+| 连别人开的服 | 客户端在登录世界时会自己读一次本地配置（供 JEI 显示），服务端行为以服务端配置为准 |
+
+已经摆好的回收机不需要重新放置——Mixin 每次都实时查规则表，没有缓存。
+
+## JEI 支持
+
+原 mod 虽然注册了 `RecyclerRecipe` 与 `registerRecyclerRecipe()`，但**既没有任何配方实例，也没有回收机的 JEI 分类**（它自带 18 个机器的分类，唯独没有回收机）。所以单靠注册配方，JEI 里依然什么都查不到。
+
+本模组自带一个 JEI 插件，直接读 `config/recyclerplus.json` 建分类：
+
+- 独立分类「回收机」，输入 → 箭头 → 产出
+- 催化剂关联到原 mod 的回收机方块，对着回收机按 `U` 即可查看
+- 概率小于 100% 的规则，在产出格 tooltip 里显示具体概率
+- 规则为空时不显示任何条目，但分类与说明仍在
+
+JEI 是**可选依赖**：没装 JEI 时插件不会被加载，机器照常工作。
+
+> 注意：JEI 展示的是**客户端本地**的配置文件。连别人的服务器时，如果服务端规则与你的本地配置不同，JEI 显示的可能是你本地的版本。
 
 ## 实现说明
 
 | 文件 | 作用 |
 |---|---|
-| `config/RecyclerRules.java` | 读取并解析 `config/recyclerplus.json`，提供 `preview` / `roll` 两个查询入口 |
+| `config/RecyclerRules.java` | 读取并解析 `config/recyclerplus.json`，提供 `all` / `preview` / `roll` 三个查询入口 |
 | `mixin/MachineInternals.java` | 取父类 `AbstractProcessingMachineBlockEntity` 的 `progress` / `itemHandler` / `finishWork()` / `stopWork()` |
 | `mixin/RecyclerState.java` | 取回收机私有字段 `scexRecycleOutcome`，用于清缓存 |
 | `mixin/RecyclerElcMixin.java` | 注入 `hasOutputSpace()` 与 `finishRecycling()` |
+| `client/RecyclerJeiPlugin.java` | JEI 插件入口：注册分类、配方、催化剂、物品说明 |
+| `client/RecyclerRecipeCategory.java` | 回收机 JEI 分类的布局与绘制 |
+| `client/ClientEvents.java` | 客户端登录世界时重读配置，保证 JEI 在多人服下也有数据 |
 
 几个必须注意的点：
 

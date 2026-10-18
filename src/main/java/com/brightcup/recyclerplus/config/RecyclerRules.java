@@ -127,6 +127,15 @@ public final class RecyclerRules {
     }
 
     /**
+     * 当前生效的规则快照（不可变），按配置文件中的书写顺序。
+     *
+     * <p>供 JEI 等展示层读取，保证「列表里显示的」与「机器真实执行的」是同一份数据。
+     */
+    public static List<Rule> all() {
+        return rules;
+    }
+
+    /**
      * 只判断是否命中规则，并给出产出，不消耗随机数。
      * 用于输出槽容量判断，避免每个 tick 都掷一次骰子。
      *

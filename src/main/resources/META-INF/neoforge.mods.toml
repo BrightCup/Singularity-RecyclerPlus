@@ -35,3 +35,11 @@ type = "required"
 versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
+
+# JEI 是可选依赖：装了才有回收机分类，没装不影响机器正常工作。
+[[dependencies.${mod_id}]]
+modId = "jei"
+type = "optional"
+versionRange = "[19.0.0,)"
+ordering = "AFTER"
+side = "CLIENT"
