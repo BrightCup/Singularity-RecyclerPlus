@@ -67,6 +67,27 @@
 
 > 需要 **JDK 21**（MC 1.21.1 的编译目标）。
 
+**已验证**：JDK 21.0.6 + Gradle 8.10.2 下 `./gradlew build` 通过，产物 11 KB，无编译警告。
+
+如果依赖下载阶段偶发 `Remote host terminated the handshake`，那是网络抖动而非代码问题
+（同一轮里 250 个依赖能成功、只挂 1 个）。加 `--max-workers=1` 降低并发后重试即可，
+已下载的部分会被 Gradle 缓存：
+
+```bash
+./gradlew build --max-workers=1
+```
+
+### 本地联调（可选）
+
+`build.gradle` 已把 `libs/mio_icif.jar` 同时声明为 `runtimeOnly`，可直接启动开发环境：
+
+```bash
+./gradlew runServer   # 服务端，运行目录 run/server
+./gradlew runClient   # 客户端，需要图形界面
+```
+
+启动日志里出现 `[RecyclerPlus] 已加载 N 条专属回收规则`，即表示 Mixin 注入成功且配置已解析。
+
 ### 用 VSCode 构建
 
 不需要 IntelliJ IDEA，VSCode 完全可以。

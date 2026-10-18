@@ -26,6 +26,8 @@ neoForge {
         }
         server {
             server()
+            gameDirectory = file('run/server')
+            programArguments.addAll '--nogui'
         }
     }
 
@@ -43,6 +45,8 @@ repositories {
 dependencies {
     // 编译期依赖原 mod。仅需编译，不需要打包进本模组。
     compileOnly files('libs/mio_icif.jar')
+    // 仅用于 runClient / runServer 的本地联调，不会被打进产物。
+    runtimeOnly files('libs/mio_icif.jar')
 }
 
 tasks.withType(JavaCompile).configureEach {
