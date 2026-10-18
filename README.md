@@ -18,19 +18,43 @@
 
 ## 构建
 
-1. 先构建原 mod，拿到它的 jar：
+### 为什么需要原 mod 的 jar
+
+本模组的代码直接引用了原 mod 的类（`mio_icif_recycler_elc`、`RecipeSlots`、`MachineItemHandler`…），
+所以 **javac 在编译期必须能看到这些类**，否则连编译都过不去。
+
+`build.gradle` 里写的是 `compileOnly files('libs/mio_icif.jar')`，含义是：
+
+- 编译时：从该 jar 读取类型信息
+- 打包时：**不**把原 mod 的类打进本模组的 jar
+- 运行时：由玩家 `mods/` 目录里的原 mod 提供
+
+所以需要的是一个**已编译好的 jar**，不是源码工程，也不需要你重新构建别人的模组。
+
+### 步骤
+
+1. 拿到原 mod 的 jar，两种方式任选：
+
+   **A. 直接用已发布的 jar（推荐）**
+
+   如果你已经装了包含该 mod 的整合包，直接从 `mods/` 目录复制即可：
+
+   ```bash
+   cp "[SI] SingularityIteration-<版本>-beta.jar" libs/mio_icif.jar
+   ```
+
+   也可以从整合包或 mod 发布页下载。
+
+   **B. 从源码构建**（仅当需要针对未发布的新版本时）
 
    ```bash
    git clone https://github.com/2132937983/Singularity-Iteration.git
-   cd Singularity-Iteration
-   ./gradlew build
+   cd Singularity-Iteration && ./gradlew build
+   cp build/libs/*.jar /path/to/Singularity-RecyclerPlus/libs/mio_icif.jar
    ```
 
-2. 把产物复制到本工程的 `libs/mio_icif.jar`（文件名必须一致，或改 `build.gradle` 里的路径）：
-
-   ```bash
-   cp build/libs/mio_icif-*.jar /path/to/Singularity-RecyclerPlus/libs/mio_icif.jar
-   ```
+2. 文件名必须为 `libs/mio_icif.jar`（或自行修改 `build.gradle` 里的路径）。
+   该文件已被 `.gitignore` 忽略，不会提交到版本库。
 
 3. 构建本模组：
 
@@ -41,7 +65,23 @@
 
    产物在 `build/libs/recyclerplus-1.0.0.jar`。
 
+> 需要 **JDK 21**（MC 1.21.1 的编译目标）。IDEA 2024+ 自带的 JetBrains Runtime 21 会被自动识别。
 > 仓库里没有附带 Gradle Wrapper 的 jar，用 IDEA 打开会自动配置 Gradle；若要用命令行，先执行一次 `gradle wrapper --gradle-version 8.10.2`。
+
+### 已校验的版本
+
+本模组的注入点已对照 `[SI] SingularityIteration-0.1.7.35.1-beta.jar` 用 `javap` 逐个核对，
+以下成员在字节码层面确认存在且签名一致：
+
+| 成员 | 实际签名 |
+|---|---|
+| `mio_icif_recycler_elc#hasOutputSpace` | `private boolean` |
+| `mio_icif_recycler_elc#finishRecycling` | `private void` |
+| `mio_icif_recycler_elc#scexRecycleOutcome` | `private int` |
+| `AbstractProcessingMachineBlockEntity#progress` / `#itemHandler` | `protected` |
+| `AbstractProcessingMachineBlockEntity#stopWork` / `#finishWork` | `protected void` |
+| `RecipeSlots#prepare` | `(MachineItemHandler,int,int,int[],List<ItemStack>) → Optional<Prepared>` |
+| `RecipeSlots.Prepared#commit` | `public boolean` |
 
 ## 使用
 
