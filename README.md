@@ -65,8 +65,33 @@
 
    产物在 `build/libs/recyclerplus-1.0.0.jar`。
 
-> 需要 **JDK 21**（MC 1.21.1 的编译目标）。IDEA 2024+ 自带的 JetBrains Runtime 21 会被自动识别。
-> 仓库里没有附带 Gradle Wrapper 的 jar，用 IDEA 打开会自动配置 Gradle；若要用命令行，先执行一次 `gradle wrapper --gradle-version 8.10.2`。
+> 需要 **JDK 21**（MC 1.21.1 的编译目标）。
+
+### 用 VSCode 构建
+
+不需要 IntelliJ IDEA，VSCode 完全可以。
+
+1. 装扩展 **Extension Pack for Java**（`vscjava.vscode-java-pack`），它会带上 Gradle for Java。
+2. 用 VSCode 打开本工程目录，等右下角 Gradle 导入完成（首次会下载依赖，较慢）。
+3. 直接按 `Ctrl+Shift+B`（或终端里跑 `./gradlew build`）。命令行和 IDE 走的是同一套 Gradle，结果完全一致。
+
+如果 VSCode 报 `No matching toolchains found for Java 21`，说明它没找到 JDK 21。两种解法：
+
+- 在 `settings.json` 里指定：`"java.import.gradle.java.home": "C:/Program Files/Java/<你的 JDK21>"`；
+- 或设置环境变量 `JAVA_HOME` 指向 JDK 21 后重启 VSCode。
+
+### 关于 Gradle Wrapper
+
+仓库已自带 wrapper（`gradlew`、`gradlew.bat`、`gradle/wrapper/`），无需本机安装 Gradle。
+
+`gradle-wrapper.properties` 里默认用腾讯云镜像：
+
+```
+distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-8.10.2-bin.zip
+```
+
+原因是官方 `services.gradle.org` 会 307 跳转到 GitHub 的 `release-assets.githubusercontent.com`，
+该域名可能不在 JDK 的 `cacerts` 里，会抛 `PKIX path building failed`。网络可达时也可以改回官方地址。
 
 ### 已校验的版本
 
