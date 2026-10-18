@@ -1,0 +1,19 @@
+.gradle/
+build/
+run/
+run-data/
+
+# 原 mod 的 jar 不进版本库，本地自行放入
+libs/*.jar
+
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+.DS_Store
+Thumbs.db

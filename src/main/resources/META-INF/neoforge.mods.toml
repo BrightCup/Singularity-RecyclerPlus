@@ -1,0 +1,37 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+description = '''
+给 Singularity Iteration 的「回收机」添加专属回收产物。
+
+命中配置的物品会按配置产出，未命中的物品仍走原版「12.5% 出废料」逻辑。
+'''
+
+[[mixins]]
+config = "recyclerplus.mixins.json"
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "mio_icif"
+type = "required"
+versionRange = "*"
+ordering = "AFTER"
+side = "BOTH"
