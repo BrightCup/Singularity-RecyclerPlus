@@ -1,5 +1,5 @@
 {
   "jei.recyclerplus.recycling": "Recycler",
-  "jei.recyclerplus.chance": "Chance: %s%%",
+  "jei.recyclerplus.chance": "Chance: %s",
   "jei.recyclerplus.info": "Items not listed here: 12.5% chance to produce Scrap, otherwise destroyed.\nCustom rules are configured in config/recyclerplus.json."
 }

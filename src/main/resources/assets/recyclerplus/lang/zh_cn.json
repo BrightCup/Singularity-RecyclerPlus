@@ -1,5 +1,5 @@
 {
   "jei.recyclerplus.recycling": "回收机",
-  "jei.recyclerplus.chance": "产出概率：%s%%",
+  "jei.recyclerplus.chance": "产出概率：%s",
   "jei.recyclerplus.info": "未列入规则的物品：12.5% 概率产出废料，其余情况直接销毁。\n专属规则可在 config/recyclerplus.json 中配置。"
 }

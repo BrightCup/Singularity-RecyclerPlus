@@ -17,6 +17,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Locale;
+
 /**
  * 「回收机」的 JEI 分类。
  *
@@ -28,14 +30,12 @@ public class RecyclerRecipeCategory implements IRecipeCategory<RecyclerJeiRecipe
     public static final RecipeType<RecyclerJeiRecipe> TYPE =
             RecipeType.create(RecyclerPlus.MOD_ID, "recycling", RecyclerJeiRecipe.class);
 
-    private static final ResourceLocation ARROW_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(RecyclerPlus.MOD_ID, "textures/gui/arrow.png");
-
-    private static final int WIDTH = 66;
+    private static final int WIDTH = 64;
     private static final int HEIGHT = 26;
     private static final int SLOT_Y = 4;
-    private static final int INPUT_X = 0;
-    private static final int OUTPUT_X = 46;
+    private static final int INPUT_X = 1;
+    private static final int OUTPUT_X = 45;
+    /** JEI 内置箭头尺寸 22x16，居中在两槽之间。 */
     private static final int ARROW_X = 22;
     private static final int ARROW_Y = 5;
 
@@ -45,7 +45,7 @@ public class RecyclerRecipeCategory implements IRecipeCategory<RecyclerJeiRecipe
 
     public RecyclerRecipeCategory(IGuiHelper helper) {
         this.background = helper.createBlankDrawable(WIDTH, HEIGHT);
-        this.arrow = helper.createDrawable(ARROW_TEXTURE, 0, 0, 24, 16);
+        this.arrow = helper.createAnimatedRecipeArrow(40);
         Item recycler = RecyclerJeiPlugin.recyclerItem();
         this.icon = recycler == null
                 ? helper.createBlankDrawable(16, 16)
@@ -94,7 +94,7 @@ public class RecyclerRecipeCategory implements IRecipeCategory<RecyclerJeiRecipe
 
         if (recipe.chance() < 1.0F) {
             output.addRichTooltipCallback((view, tooltip) -> tooltip.add(
-                    Component.translatable("jei.recyclerplus.chance", Math.round(recipe.chance() * 100.0F))
+                    Component.translatable("jei.recyclerplus.chance", chanceText(recipe.chance()))
                             .withStyle(ChatFormatting.GRAY)));
         }
     }
@@ -108,5 +108,42 @@ public class RecyclerRecipeCategory implements IRecipeCategory<RecyclerJeiRecipe
     @Override
     public ResourceLocation getRegistryName(RecyclerJeiRecipe recipe) {
         return ResourceLocation.fromNamespaceAndPath(RecyclerPlus.MOD_ID, "recycling/" + recipe.index());
+    }
+
+    /**
+     * 把概率渲染成「1/N」的分数形式。
+     *
+     * <p>用百分数时，0.001 会被四舍五入成 0%，看上去像「永远不掉」。
+     * 只有当 1/chance 足够接近整数时才写成分数（0.001 → 1/1000），
+     * 否则回退到百分数（0.3 → 30%），避免出现 1/3.33 这种读不出信息的写法。
+     */
+    private static String chanceText(float chance) {
+        if (chance <= 0.0F) {
+            return "0%";
+        }
+        float inverse = 1.0F / chance;
+        long denominator = Math.round(inverse);
+        if (denominator >= 2 && Math.abs(inverse - denominator) <= inverse * 0.005F) {
+            return "1/" + denominator;
+        }
+        return percentText(chance * 100.0F);
+    }
+
+    /** 保留最多两位小数并去掉末尾多余的 0，例如 30.00 → 30、12.50 → 12.5。 */
+    private static String percentText(float percent) {
+        if (percent < 0.01F) {
+            return "<0.01%";
+        }
+        String text = String.format(Locale.ROOT, "%.2f", percent);
+        if (text.endsWith("0")) {
+            text = text.substring(0, text.length() - 1);
+        }
+        if (text.endsWith("0")) {
+            text = text.substring(0, text.length() - 1);
+        }
+        if (text.endsWith(".")) {
+            text = text.substring(0, text.length() - 1);
+        }
+        return text + "%";
     }
 }
