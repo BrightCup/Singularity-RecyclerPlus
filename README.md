@@ -93,6 +93,29 @@ distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-8.10.2-bin.zip
 原因是官方 `services.gradle.org` 会 307 跳转到 GitHub 的 `release-assets.githubusercontent.com`，
 该域名可能不在 JDK 的 `cacerts` 里，会抛 `PKIX path building failed`。网络可达时也可以改回官方地址。
 
+### 构建卡在 maven.neoforged.net（常见）
+
+如果报错形如：
+
+```
+Could not resolve net.neoforged:neoform-runtime:...
+  > Got socket exception during request ... Connection reset
+```
+
+说明连不上 NeoForge 的 Maven 仓库。这个域名在国内经常不通，和 IDE 无关。
+
+注意 **Java 不读 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量**，代理必须单独告诉 Gradle。
+在 `%USERPROFILE%\.gradle\gradle.properties`（Linux/macOS 为 `~/.gradle/gradle.properties`）里加：
+
+```properties
+systemProp.http.proxyHost=127.0.0.1
+systemProp.http.proxyPort=7890
+systemProp.https.proxyHost=127.0.0.1
+systemProp.https.proxyPort=7890
+```
+
+端口换成你自己代理软件的端口。若代理软件开了 TUN/全局模式，则不需要这段配置。
+
 ### 已校验的版本
 
 本模组的注入点已对照 `[SI] SingularityIteration-0.1.7.35.1-beta.jar` 用 `javap` 逐个核对，

@@ -1,0 +1,5 @@
+# 统一换行符，避免在 Linux/macOS 上检出 CRLF 导致 ./gradlew 报 bad interpreter
+* text=auto eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
